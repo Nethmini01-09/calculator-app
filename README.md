@@ -12,3 +12,6 @@ A simple calculator built with HTML, CSS, and JavaScript.
 - HTML
 - CSS
 - JavaScript
+  
+## Live Demo
+[View Live](https://verdant-taiyaki-dabedb.netlify.app)
