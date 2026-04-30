@@ -1,14 +1,17 @@
 # Calculator App
 
-A simple calculator built with HTML, CSS, and JavaScript.
+A premium calculator built with HTML, CSS, and JavaScript.
 
 ## Features
+
 - Basic arithmetic operations (addition, subtraction, multiplication, division)
 - Percentage calculation
 - Positive/negative toggle
-- Clean and responsive UI
+- Expression display (shows calculation history)
+- Premium dark UI with embossed buttons
 
 ## Technologies Used
+
 - HTML
 - CSS
 - JavaScript
