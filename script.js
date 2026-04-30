@@ -1,70 +1,91 @@
-let display = document.querySelector('.display');
-let currentNumber = '';
-let previosNumber = '';
+let current = '0';
+let prev = '';
 let operator = '';
-let shouldResetDisplay = false;
+let justCalc = false;
 
-function updateDisplay(value){
-    display.textContent = value;
+const resEl = document.getElementById('result');
+const exprEl = document.getElementById('expr');
+
+function updateDisplay() {
+  resEl.textContent = current.length > 12
+    ? parseFloat(current).toExponential(4)
+    : current;
 }
 
-function handleNumber(num) {
-    if (shouldResetDisplay) {
-        currentNumber = '';
-        shouldResetDisplay = false;
+function fmt(n) {
+  if (typeof n === 'string') return n;
+  return parseFloat(n.toPrecision(10)).toString();
+}
+
+function calculate(a, op, b) {
+  const x = parseFloat(a);
+  const y = parseFloat(b);
+  if (op === '+') return x + y;
+  if (op === '−') return x - y;
+  if (op === '×') return x * y;
+  if (op === '÷') return y === 0 ? 'Error' : x / y;
+  return parseFloat(b);
+}
+
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const val = btn.dataset.val;
+
+    if (val === 'C') {
+      current = '0'; prev = ''; operator = ''; justCalc = false;
+      exprEl.textContent = '';
+      updateDisplay();
+      return;
     }
-    currentNumber += num;
-    updateDisplay(currentNumber);
-}
 
-function handlOperator(op) {
-    if (currentNumber === '') return;
-    previosNumber = currentNumber;
-    operator = op;
-    shouldResetDisplay = true;
-}
+    if (val === '+/-') {
+      current = current.startsWith('-') ? current.slice(1) : '-' + current;
+      updateDisplay();
+      return;
+    }
 
-function calculate() {
-    if (previosNumber === '' || currentNumber === '')return;
+    if (val === '%') {
+      current = fmt(parseFloat(current) / 100);
+      updateDisplay();
+      return;
+    }
 
-    let prev = parseFloat(previosNumber);
-    let current = parseFloat(currentNumber);
-    let result = 0;
+    if (['+', '−', '×', '÷'].includes(val)) {
+      if (prev && operator && !justCalc) {
+        const res = calculate(prev, operator, current);
+        prev = fmt(res);
+        current = fmt(res);
+      } else {
+        prev = current;
+      }
+      exprEl.textContent = prev + ' ' + val;
+      operator = val;
+      justCalc = false;
+      current = '0';
+      return;
+    }
 
-    if (operator === '+') result = prev + current;
-    else if (operator === '-') result = prev - current;
-    else if (operator === '×') result = prev * current;
-    else if (operator === '÷') result = prev / current;
-    else if (operator === '%') result = prev % current;
+    if (val === '=') {
+      if (!operator) return;
+      const expr = prev + ' ' + operator + ' ' + current;
+      const res = calculate(prev, operator, current);
+      exprEl.textContent = expr + ' =';
+      current = typeof res === 'string' ? res : fmt(res);
+      prev = ''; operator = ''; justCalc = true;
+      resEl.textContent = current;
+      return;
+    }
 
-    updateDisplay(result);
-    currentNumber = result.toString();
-    previosNumber = '';
-    operator = '';
-    shouldResetDisplay = true;
-}
+    if (val === '.') {
+      if (justCalc) { current = '0.'; justCalc = false; updateDisplay(); return; }
+      if (!current.includes('.')) current += '.';
+      updateDisplay();
+      return;
+    }
 
-function handleClear() {
-    currentNumber = '';
-    previosNumber = '';
-    operator = '';
-    updateDisplay('0'); 
-}
+    if (justCalc) { current = val; justCalc = false; }
+    else current = current === '0' ? val : current + val;
 
-function handlePlusMinus() {
-    if (currentNumber === '') return;
-    currentNumber = (parseFloat(currentNumber) * -1).toString();
-    updateDisplay(currentNumber);
-}
-
-document.querySelectorAll('.btn').forEach(button =>{
-    button.addEventListener('click', () => {
-        const value = button.textContent;
-
-        if(!isNaN(value) || value === '.') handleNumber(value);
-        else if (value === 'C') handleClear();
-        else if (value === '+/-') handlePlusMinus();
-        else if (value === '=') calculate();
-        else handlOperator(value);
-    });
+    updateDisplay();
+  });
 });
